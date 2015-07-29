@@ -1,0 +1,69 @@
+Multi-Lingual Noun Phrase Extractor (MuNPEx)
+http://www.semanticsoftware.info/munpex
+
+Release 2.0, 26.07.2015
+
+Copyright (c) 2005, 2006, 2010, 2012, 2015 Rene Witte (http://rene-witte.net)
+
+
+QUICK START GUIDE
+=================
+For the impatient, here's the quick start guide:
+1. Start GATE (v8 or better), go to the plugin manager
+2. Install MuNPEx through the Semantic Software Lab repository
+3. Enable the new MuNPEx plugin
+4. Load the example pipeline from "Ready Made Applications"
+
+For more information, read the documentation (and the GATE user's guide).
+
+
+FILES
+=====
+
+MuNPEx/
+  |
+  +-- build.properties
+  |     property definitions that control the build process go in here,
+  |     in particular, make sure that gate.home points to your copy of GATE.
+  +-- buildtest.xml
+  |     Ant build file for running Junit tests on the demo pipeline.
+  +-- build.xml
+  |     Ant build file for building the MuNPEx plugin.
+  +-- COPYING
+  |     GNU GPL License Version 3
+  +-- COPYING.LESSER
+  |     GNU Lesser GPL License Version 3 (MuNPEx license)
+  +-- creole.xml
+  |     plugin configuration file for GATE 
+  +-- doc/
+  |     MuNPEx end-user documentation (munpex.pdf), Javadocs
+  +-- MuNPEx_EN.jar 
+  |     JAR archive for the GATE plugin manager containing the example pipeline 
+  +-- MuNPEx.jar 
+  |     JAR archive for the GATE plugin manager containing the JAPE PR wrappers
+  +-- optional/
+  |     Optional grammars, see documentation for details
+  +-- package
+  |     Example pipeline for English 
+  +-- README
+  |     this file
+  +-- resources/
+  |     MuNPEx JAPE grammars (English, German, French, Spanish)
+  +-- src/
+  |     source code for JAPE wrappers (allowing to load grammars as PRs)
+  +-- test/
+  |      JUnit tests for example pipeline
+  +-- version.properties
+         version information for this release
+
+
+LICENSE
+=======
+MuNPEx is licensed under the GNU Lesser General Public License v3 (LGPL3),
+see the COPYING.LESSER file or https://www.gnu.org/licenses/lgpl-3.0.en.html
+
+
+SUPPORT
+=======
+For questions, comments, or even success reports, please post in the SSL Forum:
+http://www.semanticsoftware.info/forums/tools-resources-forum/durm-corpus-wiki-tools
