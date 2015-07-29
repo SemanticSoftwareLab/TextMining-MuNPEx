@@ -1,0 +1,118 @@
+//
+// Multilingual Noun Phrase Extractor (MuNPEx)
+// http://www.semanticsoftware.info/munpex
+//
+// Produces minimal NPs, i.e., no PP or other attachments
+// Results stored in "NP" annotations with DET, MOD, HEAD slots
+//
+//
+// Copyright (c) 2005, 2006, 2010, 2012, 2015 Rene Witte (http://rene-witte.net)
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 3.0 of the License, or (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library.  If not, see <http://www.gnu.org/licenses/>.
+//
+
+Phase: NP_Chunking
+Input: Token tempNP Split MultiDocSplit
+Options: control = appelt
+
+
+Rule: NP
+Priority: 50
+(
+        // Determiner
+	(({tempNP.kind == DET})?):det
+
+        // Modifiers
+	// Upto 9 modifiers for now (used to be "*", but this is more robust)
+	(({tempNP.kind == MOD})[0,9]):mod
+
+        // Head Noun
+	({tempNP.kind == HEAD}):head
+
+        // Post-Head Modifiers
+        (({tempNP.kind == MOD2})[0,5]):mod2
+):np
+-->
+{
+AnnotationSet det  = bindings.get("det");
+AnnotationSet mod  = bindings.get("mod");
+AnnotationSet head = bindings.get("head");
+AnnotationSet np   = bindings.get("np");
+AnnotationSet mod2 = bindings.get("mod2");
+Annotation headAnn = (gate.Annotation)head.iterator().next();
+FeatureMap features = Factory.newFeatureMap();
+
+// offset features
+features.put("HEAD_END", headAnn.getEndNode().getOffset());
+features.put("HEAD_START", headAnn.getStartNode().getOffset());
+features.put("Pronoun", headAnn.getFeatures().get("Pronoun"));
+Long modStart = null;
+Long modEnd = null;
+if( mod != null ) {
+    Iterator modIterator = mod.iterator();
+    Annotation modAnn = (Annotation)modIterator.next();
+    modStart = modAnn.getStartNode().getOffset();
+    modEnd = modAnn.getEndNode().getOffset();
+    while( modIterator.hasNext()) {
+        modAnn = (Annotation)modIterator.next();
+	if( modAnn.getStartNode().getOffset().longValue() < modStart.longValue() )
+            modStart = modAnn.getStartNode().getOffset();
+	if( modAnn.getEndNode().getOffset().longValue() > modEnd.longValue() )
+            modEnd = modAnn.getEndNode().getOffset();
+    }
+    // you can comment out these two lines if you don't need MOD position information
+    features.put( "MOD_START", modStart );
+    features.put( "MOD_END", modEnd );
+}
+if( det != null ) {
+    gate.Annotation detAnn = (gate.Annotation)det.iterator().next();
+    // you can comment out these two lines if you don't need DET position information
+    features.put( "DET_END", detAnn.getEndNode().getOffset());
+    features.put( "DET_START", detAnn.getStartNode().getOffset());
+}
+
+// content features
+try {
+    features.put( "HEAD", doc.getContent().getContent( headAnn.getStartNode().getOffset(), headAnn.getEndNode().getOffset() ).toString());
+} catch (Exception ex) {
+    System.out.println( "Exception in np.jape: " + ex );
+}
+if( mod != null ) {
+    try {
+        features.put( "MOD", doc.getContent().getContent( modStart, modEnd ).toString() );
+    } catch (Exception ex) {
+        System.out.println( "Exception in np.jape: " + ex );
+    }
+}
+if( det != null ) {
+    gate.Annotation detAnn = (gate.Annotation)det.iterator().next();
+    try {
+        features.put( "DET", doc.getContent().getContent( detAnn.getStartNode().getOffset(), detAnn.getEndNode().getOffset() ).toString());
+    } catch (Exception ex) {
+        System.out.println( "Exception in np.jape: " + ex );
+    }
+}
+if( mod2 != null ) {
+    gate.Annotation mod2Ann = (gate.Annotation)mod2.iterator().next();
+    try {
+        features.put( "MOD2", doc.getContent().getContent( mod2Ann.getStartNode().getOffset(), mod2Ann.getEndNode().getOffset() ).toString());
+    } catch (Exception ex) {
+        System.out.println( "Exception in np.jape: " + ex );
+    }
+}
+
+// Add the NP	
+// features.put( "rule", "NP" );
+outputAS.add( np.firstNode(), np.lastNode(), "NP", features );
+}

@@ -1,0 +1,5 @@
+<CREOLE-DIRECTORY ID="MuNPEx" VERSION="2.0-r190" GATE-MIN="6.0"
+        DESCRIPTION="Multi-lingual Noun Phrase Extractor (MuNPEx) - a noun phrase chunker for English, German, and French (with Spanish in beta)" HELPURL="http://www.semanticsoftware.info/munpex">
+     <JAR SCAN="true">MuNPEx.jar</JAR>
+     <JAR SCAN="true">MuNPEx_EN.jar</JAR>
+</CREOLE-DIRECTORY>

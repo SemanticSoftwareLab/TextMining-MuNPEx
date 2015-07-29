@@ -1,0 +1,70 @@
+//
+// Multilingual Noun Phrase Extractor (MuNPEx)
+// http://www.semanticsoftware.info/munpex
+//
+// Grammar for detecting Named Entities
+//
+// Copyright (c) 2005, 2006, 2010, 2012, 2015 Rene Witte (http://rene-witte.net)
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 3.0 of the License, or (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library.  If not, see <http://www.gnu.org/licenses/>.
+//
+
+Phase: NP_Entities
+Input: Person Unknown Organization Location Number Address AbbrNAcro Money Percent Date DATE LOC NMB ORG PER PROF TIME PRC Organism
+Options: control = appelt
+
+Macro: ANNIE_ENTITIES
+// entities that come with the default ANNIE application
+// the same entities also appear with the French plugin for GATE
+(
+	{Person}|
+	{Unknown}|
+	{Organization}|
+	{Location}|
+	{Address}|
+	{Money}|
+	{Percent}|
+	{Date}
+)
+
+Macro: GERMAN_ENTITIES
+// these are the entites that come with the GATE plugin for German
+(
+	{DATE}|
+	{LOC}|
+//	{NMB}|
+	{ORG}|
+	{PER}|
+	{PROF}|
+	{TIME}|
+	{PRC}
+)
+
+Macro: BIO_ENTITIES
+// biological entities
+(
+	{Organism}              // from the OrganismTagger
+)
+
+Rule: head
+Priority: 90
+(
+	ANNIE_ENTITIES|
+	GERMAN_ENTITIES|
+	BIO_ENTITIES|
+	{Number}|
+	{AbbrNAcro}
+):head
+-->
+	:head.tempNP = {kind = "HEAD", Pronoun="false"}

@@ -1,0 +1,78 @@
+//
+// Multilingual Noun Phrase Extractor (MuNPEx)
+// http://www.semanticsoftware.info/munpex
+//
+// German NPs
+//
+// Copyright (c) 2005, 2006, 2010, 2012, 2015 Rene Witte (http://rene-witte.net)
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 3.0 of the License, or (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library.  If not, see <http://www.gnu.org/licenses/>.
+//
+
+Phase: DE_NP_Parts
+Input: Token Number
+Options: control = appelt
+
+Rule: det
+Priority: 50
+(
+	({Token.category == ART})
+):det
+-->
+	:det.tempNP = {kind = "DET"}
+
+
+Rule: mod
+Priority: 50
+(
+	{Token.category == ADV}|
+	{Token.category == ADJA}|
+	{Token.category == ADJD}|
+	{Token.category == CARD}|
+	{Token.category == PPOSAT}|
+	{Number}
+):mod
+-->
+	:mod.tempNP = {kind = "MOD"}
+
+
+Rule: pronoun
+	//{Token.category == PPER}|
+	{Token.category == PDS})
+):head
+-->
+	:head.tempNP = {kind = "HEAD", Pronoun="true"}
+
+
+Rule: head
+(
+	(({Token.category == TRUNC})[0,5])
+	  ({Token.category == NN}|
+	  {Token.category == NE}|
+	  {Token.category == FM}|
+):head
+-->
+	:head.tempNP = {kind = "HEAD", Pronoun="false"}}
+
+
+Rule: head2
+(
+	({Token.Comment == "<unknown>", Token.orth == "upperInitial"}|{Token.category == NN}|{Token.category == NE})
+	(
+		{Token.string == "-"}
+		({Token.Comment == "<unknown>", Token.orth == "upperInitial"}|{Token.category == NN}|{Token.category == NE})
+	)*
+):head
+-->
+	:head.tempNP = {kind = "HEAD", Pronoun="false"}}

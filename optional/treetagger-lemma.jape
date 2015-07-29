@@ -1,0 +1,55 @@
+//
+// Multilingual Noun Phrase Extractor (MuNPEx)
+// http://www.semanticsoftware.info/munpex
+//
+// Helper grammar to add an HEAD_LEMMA slot with a lemmatized version
+// of the word contained in the HEAD slot using the output of the
+// TreeTagger
+//
+// Copyright (c) 2005, 2006, 2010, 2012, 2015 Rene Witte (http://rene-witte.net)
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 3.0 of the License, or (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library.  If not, see <http://www.gnu.org/licenses/>.
+//
+
+Phase: TREETAGGER_NP_Lemma
+Input: NP Token
+Options: control = appelt
+
+Rule: TTNPLemma
+Priority: 50
+(
+	{NP}
+):np1
+-->
+{
+AnnotationSet npSet = bindings.get("np1");
+Annotation npAnn = npSet.iterator().next();
+FeatureMap npFeatures = npAnn.getFeatures();
+long headStart = ((Long)npFeatures.get( "HEAD_START" )).longValue();
+long headEnd = ((Long)npFeatures.get( "HEAD_END" )).longValue();
+AnnotationSet lemmas = doc.getAnnotations().get( "Token", headStart, headEnd );
+String lemmaStr = null;
+if( lemmas != null ) {
+    Iterator lemmaIterator = lemmas.iterator();
+    if( lemmaIterator.hasNext() ) {
+	Annotation lemma = (Annotation)lemmaIterator.next();
+	if( !lemmaIterator.hasNext() )
+	    lemmaStr = (String)lemma.getFeatures().get( "lemma" );
+    }
+}
+String npLemma = (String)npAnn.getFeatures().get( "HEAD" ).toString();
+if( lemmaStr != null && lemmaStr.length() <= npLemma.length() )
+    npLemma = lemmaStr;
+npFeatures.put( "HEAD_LEMMA", npLemma );
+}

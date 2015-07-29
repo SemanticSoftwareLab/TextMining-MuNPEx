@@ -1,0 +1,144 @@
+//
+// Multilingual Noun Phrase Extractor (MuNPEx)
+// http://www.semanticsoftware.info/munpex
+//
+// English NP parts
+//
+// Copyright (c) 2005, 2006, 2010, 2012, 2015 Rene Witte (http://rene-witte.net)
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 3.0 of the License, or (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library.  If not, see <http://www.gnu.org/licenses/>.
+//
+
+Phase: EN_NP_Parts
+Input: Token Date Person Unknown Number Organization Location Address AbbrNAcro Money Percent Organism
+Options: control = brill
+
+Macro: QUOTES
+(
+	{Token.category == "''"}|
+	{Token.category == "``"}|
+	{Token.string == "\""}|
+	{Token.string == "'"}|
+	{Token.string == "`"}|
+	{Token.string == "´"}|
+	{Token.string == "''"}|
+	{Token.string == "``"}|
+	{Token.string == "´´"}|
+	{Token.string == "”"}|
+	{Token.string == "“"}|
+	{Token.string == "”"}|
+	{Token.string == "‘"}| 
+	{Token.string == "’"}|
+	{Token.string == "«"}|
+	{Token.string == "»"}|
+	{Token.string == "‹"}|
+	{Token.string == "›"}|
+	{Token.string == "’"}|
+	{Token.string == "'"}|
+	{Token.string == "「"}|
+	{Token.string == "」"}|
+	{Token.string == "『"}|
+	{Token.string == "』"}
+)
+
+Macro: ANNIE_ENTITIES
+(
+	{Person}|
+	{Unknown}|
+	{Organization}|
+	{Location}|
+	{Address}|
+	{Money}|
+	{Percent}|
+	{Date}
+)
+
+Macro: BIO_ENTITIES
+(
+	{Organism}             // from the OrganismTagger
+)
+
+Rule: det
+(
+	{Token.category == DT}|
+	{Token.category == WDT}|
+	{Token.category == "PRP$"}|
+	({Token.category == PDT}{Token.category == DET})|
+	({Token.category == DT}{Token.category == DT})
+)
+:det
+-->
+	:det.tempNP = {kind = "DET"}
+
+
+Rule: mod
+(
+	(QUOTES)?
+	({Token.category == CD}|
+	{Token.category == JJ}|
+	{Token.category == JJR}|
+	{Token.category == JJS}|
+//	{Token.category == CC}|
+	{Token.category == RP}|
+	{Token.category == RB}|
+	{Token.category == RBR}|
+	{Token.category == RBS}|
+	{Token.category == PART}|
+	{Token.category == NN}|
+	{Token.category == NNS}|
+	{Token.category == NNP}|
+	{Token.category == NNPS}|
+	{Token.category == POS}|
+//	{Token.category == VB}|
+//	{Token.category == VBP}|
+//	{Token.category == VBN}|
+//	{Token.category == VBD}|
+//	{Token.category == VBG}|
+	({Token.category == ","}{Token.category == JJ})|
+	{Token.string == "-"}|
+	ANNIE_ENTITIES|
+	BIO_ENTITIES|
+	{Number}|
+	{AbbrNAcro})
+	(QUOTES)?
+):mod
+-->
+	:mod.tempNP = {kind = "MOD"}
+
+
+Rule: pronoun
+(
+	{Token.category == PRP}
+):head
+-->
+	:head.tempNP = {kind = "HEAD", Pronoun="true"}
+
+
+Rule: head
+(
+	{Token.category == NN}|
+	{Token.category == NNP}|
+	{Token.category == NNPS}|
+	{Token.category == NNS}|
+	{Token.category == RP}|
+	{Token.category == CD}
+//	{Token.category == WP}|
+//	{Token.category == WRB}|
+//	{Token.category == WDT}|
+//	{Token.category == EX}
+//=======
+//	{Token.category == EX}
+):head
+-->
+	:head.tempNP = {kind = "HEAD", Pronoun="false"}
