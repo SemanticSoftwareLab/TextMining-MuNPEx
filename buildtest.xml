@@ -1,0 +1,89 @@
+<!--
+ * Multilingual Noun Phrase Extractor (MuNPEx) 
+ * http://www.semanticsoftware.info/munpex
+ *
+ * ant build file for running demo pipeline tests
+ *
+ * Copyright (c) 2005, 2006, 2010, 2012, 2015 Rene Witte (http://rene-witte.net)
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3.0 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<project name="MuNPEx_EN_Test" basedir="." xmlns:jacoco="antlib:org.jacoco.ant">
+	<property file="build.properties" />
+	
+	<!-- Make environment variables available -->
+	<property environment="env" />
+
+	<!-- If environment variable GATE_HOME is set, use it for
+	     gate.home (unless it was already set in build.properties -->
+	<condition property="gate.home" value="${env.GATE_HOME}">
+	  <isset property="env.GATE_HOME"/>
+	</condition>
+	<property name="gate.home" location="/usr/local/durmtools/GATE/gate" />
+	<property name="gate.lib" location="${gate.home}/lib" />
+	<property name="gate.jar" location="${gate.home}/bin/gate.jar" />
+	<property name="test.dir" location="test" />
+	<property name="test.reports.dir" location="${test.dir}/reports" />
+	<property name="test.src.dir" location="${test.dir}/src" />
+	<property name="test.classes.dir" location="${test.dir}/classes" />
+
+	<!-- Path to compile - includes gate.jar and GATE/lib/*.jar -->
+	<path id="compile.classpath">
+		<pathelement location="${gate.jar}" />
+		<fileset dir="${gate.lib}">
+			<include name="**/*.jar" />
+			<include name="**/*.zip" />
+		</fileset>
+	</path>
+
+	<!-- For JaCoCo Ant tasks -->
+	<taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
+		<classpath path="/usr/local/durmtools/jacoco/lib/jacocoant.jar" />
+	</taskdef>
+	<property name="result.dir" location="./target" />
+	<property name="result.classes.dir" location="${classes.dir}" />
+	<property name="result.report.dir" location="${result.dir}/site/jacoco" />
+	<property name="result.exec.file" location="${result.dir}/jacoco.exec" />
+
+	<!-- Pipeline tests -->
+
+	<path id="test.classpath">
+	  <path refid="compile.classpath" />
+	  <pathelement location="${jar.location}" />
+	</path>
+	
+	<target name="test.prepare">
+	  <mkdir dir="${test.classes.dir}" />
+	  <mkdir dir="${test.reports.dir}" />
+	</target>
+	
+	<target name="test.compile" depends="test.prepare">
+	  <javac classpathref="test.classpath" srcdir="${test.src.dir}" destdir="${test.classes.dir}" debug="true" debuglevel="lines,vars,source" source="1.7" includeantruntime="false"/>
+	</target>
+	
+	<target name="test" depends="test.compile">
+	  <jacoco:coverage destfile="${result.exec.file}">
+	    <junit fork="yes" haltonfailure="yes" printsummary="on" maxmemory="1000m">
+	      <test name="info.semanticsoftware.munpex.MuNPExTest_EN" toDir="${test.reports.dir}" />
+	      <sysproperty key="munpex.en.app.name"
+			   file="${basedir}/package/MuNPEx-EN.xgapp" />
+	      <formatter type="xml" />
+	      <classpath>
+		<path refid="test.classpath" />
+		<pathelement path="${test.classes.dir}" />
+	      </classpath>
+	    </junit>
+	  </jacoco:coverage>
+	</target>
+</project>
